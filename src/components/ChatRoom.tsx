@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "./ChatRoom.css";
 import { SessionChatMessage } from "teleparty-websocket-lib";
 import { useTelepartyClient } from "../hooks/useTelepartySockets";
 
+// Inside ChatRoom component
 interface ChatRoomProps {
   roomId: string;
   nickname: string;
@@ -23,6 +24,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const { sendTypingPresence, anyoneTyping } = useTelepartyClient();
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const roomLink = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
   window.history.pushState({}, "", roomLink);
   const [copied, setCopied] = useState(false);
@@ -57,6 +59,10 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
   return (
     <div>
       <h3>Chat Room: {roomId}</h3>
@@ -71,18 +77,19 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         )}
       </div>
       <div className="messages">
-        {messages.map((msg) => {
-          console.log("msg");
-          return (
-            <div key={msg.permId}>
-              <div>
-                {msg.userIcon && <img src={msg.userIcon} alt="User Icon" />}
-                <strong>{msg.userNickname}</strong>:
-              </div>
-              <div>{msg.body}</div>
+        {messages.map((msg) => (
+          <div
+            key={msg.permId}
+            className={`chat-bubble ${msg.userNickname === nickname ? "self-message" : "other-message"}`}
+          >
+            <div className="chat-meta">
+              {msg.userIcon && <img src={msg.userIcon} alt="User Icon" />}
+              <strong>{msg.userNickname}</strong>
             </div>
-          );
-        })}
+            <div className="message-text">{msg.body}</div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
       <div className="send-message-parent">
         <input
@@ -90,6 +97,11 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
           value={message}
           onChange={handleTyping}
           onBlur={handleBlur}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleSendMessage();
+            }
+          }}
           placeholder="Type a message..."
         />
         <button onClick={handleSendMessage}>Send</button>
