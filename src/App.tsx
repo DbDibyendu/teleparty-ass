@@ -13,7 +13,7 @@ const App: React.FC = () => {
   const handleCreateRoom = async () => {
     if (nickname) {
       const newRoomId = await createRoom(nickname, userIcon);
-      setRoomId(newRoomId);
+      setRoomId(newRoomId as string);
       setIsRoomCreator(true);
     }
   };
