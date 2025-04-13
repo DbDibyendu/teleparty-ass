@@ -1,7 +1,8 @@
+// vite.config.ts or vite.config.js
 import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  server: {
-    allowedHosts: true, // Bind the server to all network interfaces
-  },
+  plugins: [react()],
+  base: "/teleparty-chat/", // important for GitHub Pages
 });
