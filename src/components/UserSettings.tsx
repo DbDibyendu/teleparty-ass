@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./UserSettings.css";
 
 interface UserSettingsProps {
@@ -30,6 +30,15 @@ export const UserSettings: React.FC<UserSettingsProps> = ({
       reader.readAsDataURL(file);
     }
   };
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const roomFromQuery = queryParams.get("roomId");
+
+    if (roomFromQuery) {
+      setInputRoomId(roomFromQuery);
+    }
+  }, []);
 
   return (
     <div className="user-settings-container">

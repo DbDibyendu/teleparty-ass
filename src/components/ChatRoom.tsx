@@ -23,6 +23,10 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const { sendTypingPresence, anyoneTyping } = useTelepartyClient();
 
+  const roomLink = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
+
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
     // Send typing status when typing changes
     console.log("reached typing", isTyping);
@@ -48,12 +52,24 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     setIsTyping(false);
   };
 
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(roomLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   return (
     <div>
       <h3>Chat Room: {roomId}</h3>
       <h3>User Name: {nickname}</h3>
       {isRoomCreator ? <h3>Room Creator</h3> : null}
       {anyoneTyping && <p>Someone is typing...</p>}
+
+      <div style={{ marginBottom: "1rem" }}>
+        <button onClick={handleCopyLink}>Copy Room Link</button>
+        {copied && (
+          <span style={{ marginLeft: "10px", color: "green" }}>Copied!</span>
+        )}
+      </div>
       <div className="messages">
         {messages.map((msg) => {
           console.log("msg");
