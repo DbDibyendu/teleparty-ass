@@ -24,7 +24,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const { sendTypingPresence, anyoneTyping } = useTelepartyClient();
 
   const roomLink = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
-
+  window.history.pushState({}, "", roomLink);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
