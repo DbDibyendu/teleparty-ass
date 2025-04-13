@@ -4,5 +4,5 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/teleparty-chat/", // important for GitHub Pages
+  base: "/teleparty-ass/", // important for GitHub Pages
 });
