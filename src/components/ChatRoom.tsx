@@ -42,10 +42,10 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   }, [isTyping, sendTypingPresence]);
 
   // for saving the session in local storage
-  useEffect(() => {
-    localStorage.setItem("roomId", roomId);
-    localStorage.setItem("nickname", nickname);
-  }, [roomId, nickname]);
+  //useEffect(() => {
+  //  localStorage.setItem("roomId", roomId);
+  //  localStorage.setItem("nickname", nickname);
+  //}, [roomId, nickname]);
 
   const handleSendMessage = () => {
     if (message.trim()) {

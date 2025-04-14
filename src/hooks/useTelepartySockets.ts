@@ -53,17 +53,23 @@ export const useTelepartyClient = () => {
   const sendTypingPresence = (typing: boolean) => {
     if (clientRef.current) {
       const typingData: SetTypingMessageData = { typing };
-      console.log("send message to server", typingData);
-      clientRef.current.sendMessage(
-        SocketMessageTypes.SET_TYPING_PRESENCE,
-        typingData,
-      );
+      console.log("typinge to server", typingData);
+      try {
+        clientRef.current.sendMessage(
+          SocketMessageTypes.SET_TYPING_PRESENCE,
+          typingData,
+        );
+      } catch (err) {
+        console.log("sendTypingPresence error", err);
+      }
     }
   };
 
   const createRoom = async (nickname: string, userIcon?: string) => {
-    if (!isConnected) return;
-    if (!clientRef.current) return;
+    if (!isConnected || !clientRef.current) {
+      alert("Connection failed");
+      return;
+    }
     const roomId = await clientRef.current.createChatRoom(nickname, userIcon);
     return roomId;
   };
@@ -93,7 +99,7 @@ export const useTelepartyClient = () => {
 
       setMessages(sessionData.messages);
     } catch {
-      alert("Connection failed");
+      alert("No active Session");
       return false;
     }
     return true;
