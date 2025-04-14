@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "./ChatRoom.css";
 import { SessionChatMessage } from "teleparty-websocket-lib";
-import { useTelepartyClient } from "../hooks/useTelepartySockets";
 
 // Inside ChatRoom component
 interface ChatRoomProps {
