@@ -24,45 +24,33 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   messages,
 }) => {
   const [message, setMessage] = useState<string>("");
-  const [isTyping, setIsTyping] = useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const roomLink = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
   window.history.pushState({}, "", roomLink);
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    console.log("reached typing", isTyping);
-    sendTypingPresence(isTyping);
-
-    return () => {
-      sendTypingPresence(false);
-    };
-  }, [isTyping, sendTypingPresence]);
-
   // for saving the session in local storage
-  //useEffect(() => {
-  //  localStorage.setItem("roomId", roomId);
-  //  localStorage.setItem("nickname", nickname);
-  //}, [roomId, nickname]);
+  useEffect(() => {
+    sessionStorage.setItem("roomId", roomId);
+    sessionStorage.setItem("nickname", nickname);
+  }, [roomId, nickname]);
 
   const handleSendMessage = () => {
     if (message.trim()) {
       sendMessage(message);
       setMessage("");
     }
+    sendTypingPresence(false);
   };
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage(e.target.value);
-    if (!isTyping) {
-      console.log("user started typing");
-      setIsTyping(true);
-    }
+    sendTypingPresence(true);
   };
 
   const handleBlur = () => {
-    setIsTyping(false);
+    sendTypingPresence(false);
   };
 
   const handleCopyLink = () => {
@@ -89,6 +77,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
     window.location.reload();
   };
 
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div>
       <h3>Chat Room: {roomId}</h3>
@@ -120,12 +109,15 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       </div>
       <div className="send-message-parent">
         <div className="typing-indicator">
-          {anyoneTyping && <p>💬 Someone is typing...</p>}
+          {!inputRef?.current?.value && anyoneTyping && (
+            <p>💬 Someone is typing...</p>
+          )}
         </div>
         <div className="send-message-child">
           <div className="input-area">
             <input
               type="text"
+              ref={inputRef}
               value={message}
               onChange={handleTyping}
               onBlur={handleBlur}
