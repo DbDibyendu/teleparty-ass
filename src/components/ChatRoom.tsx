@@ -11,6 +11,8 @@ interface ChatRoomProps {
   sendMessage: (body: string) => void;
   messages: SessionChatMessage[];
   isRoomCreator: boolean;
+  anyoneTyping: boolean;
+  sendTypingPresence: (typing: boolean) => void;
 }
 
 export const ChatRoom: React.FC<ChatRoomProps> = ({
@@ -18,25 +20,23 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   nickname,
   isRoomCreator,
   sendMessage,
+  sendTypingPresence,
+  anyoneTyping,
   messages,
 }) => {
   const [message, setMessage] = useState<string>("");
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const { sendTypingPresence, anyoneTyping } = useTelepartyClient();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const roomLink = `${window.location.origin}${window.location.pathname}?roomId=${roomId}`;
   window.history.pushState({}, "", roomLink);
   const [copied, setCopied] = useState(false);
 
-  // typing logic
   useEffect(() => {
-    // Send typing status when typing changes
     console.log("reached typing", isTyping);
     sendTypingPresence(isTyping);
 
     return () => {
-      // Reset typing status when component unmounts or effect is cleaned up
       sendTypingPresence(false);
     };
   }, [isTyping, sendTypingPresence]);
@@ -95,7 +95,6 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       <h3>Chat Room: {roomId}</h3>
       <h3>User Name: {nickname}</h3>
       {isRoomCreator ? <h3>Room Creator</h3> : null}
-      {anyoneTyping && <p>Someone is typing...</p>}
       <button onClick={handleLeaveRoom} className="leave-room-button">
         Leave Room
       </button>
@@ -121,19 +120,26 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
         <div ref={messagesEndRef} />
       </div>
       <div className="send-message-parent">
-        <input
-          type="text"
-          value={message}
-          onChange={handleTyping}
-          onBlur={handleBlur}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSendMessage();
-            }
-          }}
-          placeholder="Type a message..."
-        />
-        <button onClick={handleSendMessage}>Send</button>
+        <div className="typing-indicator">
+          {anyoneTyping && <p>💬 Someone is typing...</p>}
+        </div>
+        <div className="send-message-child">
+          <div className="input-area">
+            <input
+              type="text"
+              value={message}
+              onChange={handleTyping}
+              onBlur={handleBlur}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSendMessage();
+                }
+              }}
+              placeholder="Type a message..."
+            />
+            <button onClick={handleSendMessage}>Send</button>
+          </div>
+        </div>
       </div>
     </div>
   );

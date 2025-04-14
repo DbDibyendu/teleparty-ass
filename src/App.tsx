@@ -8,7 +8,14 @@ const App: React.FC = () => {
   const [userIcon, setUserIcon] = useState<string | undefined>(undefined);
   const [roomId, setRoomId] = useState<string>("");
   const [isRoomCreator, setIsRoomCreator] = useState<boolean>(false);
-  const { createRoom, joinRoom, sendMessage, messages } = useTelepartyClient();
+  const {
+    createRoom,
+    joinRoom,
+    sendMessage,
+    messages,
+    sendTypingPresence,
+    anyoneTyping,
+  } = useTelepartyClient();
 
   const handleCreateRoom = async () => {
     if (nickname) {
@@ -36,6 +43,8 @@ const App: React.FC = () => {
           userIcon={userIcon}
           sendMessage={sendMessage}
           messages={messages}
+          sendTypingPresence={sendTypingPresence}
+          anyoneTyping={anyoneTyping}
         />
       ) : (
         <UserSettings
