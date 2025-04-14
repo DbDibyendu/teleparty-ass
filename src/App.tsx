@@ -19,13 +19,10 @@ const App: React.FC = () => {
   };
 
   const handleJoinRoom = async (roomId: string) => {
-    try {
-      await joinRoom(nickname, roomId, userIcon);
+    const ableToJoin = await joinRoom(nickname, roomId, userIcon);
+    if (ableToJoin) {
       setRoomId(roomId);
       setIsRoomCreator(false);
-    } catch (error) {
-      console.error("Failed to join room:", error);
-      alert("Enter Nickname or Invalid room ID or connection error.");
     }
   };
 

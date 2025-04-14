@@ -29,11 +29,23 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   window.history.pushState({}, "", roomLink);
   const [copied, setCopied] = useState(false);
 
+  // typing logic
   useEffect(() => {
     // Send typing status when typing changes
     console.log("reached typing", isTyping);
     sendTypingPresence(isTyping);
+
+    return () => {
+      // Reset typing status when component unmounts or effect is cleaned up
+      sendTypingPresence(false);
+    };
   }, [isTyping, sendTypingPresence]);
+
+  // for saving the session in local storage
+  useEffect(() => {
+    localStorage.setItem("roomId", roomId);
+    localStorage.setItem("nickname", nickname);
+  }, [roomId, nickname]);
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -63,13 +75,30 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const handleLeaveRoom = () => {
+    localStorage.removeItem("roomId");
+    localStorage.removeItem("nickname");
+    localStorage.removeItem("userIcon");
+
+    // Clear the roomId from the URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete("roomId");
+    window.history.replaceState({}, "", url.pathname);
+
+    // Reload to reset the app state
+    window.location.reload();
+  };
+
   return (
     <div>
       <h3>Chat Room: {roomId}</h3>
       <h3>User Name: {nickname}</h3>
       {isRoomCreator ? <h3>Room Creator</h3> : null}
       {anyoneTyping && <p>Someone is typing...</p>}
-
+      <button onClick={handleLeaveRoom} className="leave-room-button">
+        Leave Room
+      </button>
       <div style={{ marginBottom: "1rem" }}>
         <button onClick={handleCopyLink}>Copy Room Link</button>
         {copied && (

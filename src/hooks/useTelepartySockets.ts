@@ -73,8 +73,15 @@ export const useTelepartyClient = () => {
     roomId: string,
     userIcon?: string,
   ) => {
-    if (!nickname || !isConnected || !clientRef.current) {
-      throw new Error("Something went wrong!");
+    if (!nickname) {
+      alert("Please enter username");
+      return false;
+    } else if (!isConnected || !clientRef.current) {
+      alert("Connection failed");
+      return false;
+    } else if (!roomId) {
+      alert("Wrong Room Id");
+      return false;
     }
 
     try {
@@ -86,8 +93,10 @@ export const useTelepartyClient = () => {
 
       setMessages(sessionData.messages);
     } catch {
-      throw new Error("Error joining chat room:");
+      alert("Connection failed");
+      return false;
     }
+    return true;
   };
 
   const sendMessage = (body: string) => {
