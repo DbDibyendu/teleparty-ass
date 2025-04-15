@@ -60,23 +60,6 @@ const App: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        console.log("User returned to tab/app");
-        setTimeout(() => tryRejoin(), 1200);
-      } else {
-        console.log("User left tab/app");
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, []);
-
   return (
     <div className="App">
       {isTryingRejoin ? (

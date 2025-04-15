@@ -24,8 +24,6 @@ export const useTelepartyClient = () => {
   const clientRef = useRef<TelepartyClient | null>(null);
 
   const connectClient = useCallback(() => {
-    if (clientRef.current !== null) return; // Already connected
-
     const handler: SocketEventHandler = {
       onConnectionReady: () => {
         setIsConnected(true);
@@ -51,15 +49,8 @@ export const useTelepartyClient = () => {
   }, []);
 
   useEffect(() => {
-    connectClient(); // Initial connection on mount
-    if (!clientRef.current) {
-      connectClient();
-      setIsConnected(false);
-    }
-  }, [clientRef.current]);
-
-  useEffect(() => {
     // checking if connection is idle or not at interval of 5
+    connectClient();
     const interval = setInterval(() => {
       console.log("Checking connection.. ");
       if (!clientRef.current) {
