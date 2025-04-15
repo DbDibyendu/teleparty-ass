@@ -53,9 +53,9 @@ export const useTelepartyClient = () => {
   useEffect(() => {
     connectClient(); // Initial connection on mount
     const onReturn = () => {
-      if (document.visibilityState === "visible") {
-        console.log("Tab is back in focus.");
-        connectClient(); // reconnect if client was killed while in background
+      if (!clientRef.current) {
+        console.log("Reconnecting from focus or visibility...");
+        connectClient();
       }
     };
 
@@ -66,7 +66,6 @@ export const useTelepartyClient = () => {
     return () => {
       document.addEventListener("visibilitychange", onReturn);
       window.addEventListener("focus", onReturn);
-      clientRef.current = null;
     };
   }, []);
 
