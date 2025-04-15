@@ -52,13 +52,24 @@ export const useTelepartyClient = () => {
 
   useEffect(() => {
     connectClient(); // Initial connection on mount
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("Tab is back in focus.");
+        connectClient(); // reconnect if client was killed while in background
+      }
+    };
+
+    // for mobile browser
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       clientRef.current = null;
     };
   }, []);
 
   useEffect(() => {
+    // checking if connection is idle or not at interval of 5
     const interval = setInterval(() => {
       console.log("Checking connection.. ");
       if (!clientRef.current) {
