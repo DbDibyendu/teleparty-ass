@@ -20,27 +20,25 @@ const App: React.FC = () => {
     isConnected,
   } = useTelepartyClient();
 
-  useEffect(() => {
+  const tryRejoin = async () => {
     const queryParams = new URLSearchParams(window.location.search);
     const roomFromQuery = queryParams.get("roomId");
+    const savedRoomId = roomFromQuery || sessionStorage.getItem("roomId");
+    const savedNickname = sessionStorage.getItem("nickname");
 
-    const tryRejoin = async () => {
-      const savedRoomId = roomFromQuery || sessionStorage.getItem("roomId");
-      const savedNickname = sessionStorage.getItem("nickname");
-
-      if (savedRoomId && savedNickname && isConnected) {
-        const joined = await joinRoom(savedNickname, savedRoomId, "");
-        if (joined) {
-          setNickname(savedNickname);
-          setRoomId(savedRoomId);
-          setIsRoomCreator(false);
-        } else {
-          sessionStorage.clear();
-        }
+    if (savedRoomId && savedNickname && isConnected) {
+      const joined = await joinRoom(savedNickname, savedRoomId, "");
+      if (joined) {
+        setNickname(savedNickname);
+        setRoomId(savedRoomId);
+        setIsRoomCreator(false);
+      } else {
+        sessionStorage.clear();
       }
-      setIsTryingRejoin(false);
-    };
-
+    }
+    setIsTryingRejoin(false);
+  };
+  useEffect(() => {
     if (isConnected) {
       setTimeout(() => tryRejoin(), 1200);
     }
@@ -61,6 +59,23 @@ const App: React.FC = () => {
       setIsRoomCreator(false);
     }
   };
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        console.log("User returned to tab/app");
+        setTimeout(() => tryRejoin(), 1200);
+      } else {
+        console.log("User left tab/app");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   return (
     <div className="App">
