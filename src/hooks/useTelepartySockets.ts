@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import {
   TelepartyClient,
   SocketEventHandler,
@@ -23,7 +23,7 @@ export const useTelepartyClient = () => {
 
   const clientRef = useRef<TelepartyClient | null>(null);
 
-  const connectClient = () => {
+  const connectClient = useCallback(() => {
     if (clientRef.current !== null) return; // Already connected
 
     const handler: SocketEventHandler = {
@@ -48,11 +48,11 @@ export const useTelepartyClient = () => {
 
     const newClient = new TelepartyClient(handler);
     clientRef.current = newClient;
-  };
+  }, []);
 
   useEffect(() => {
     connectClient(); // Initial connection on mount
-    const handleVisibilityChange = () => {
+    const onReturn = () => {
       if (document.visibilityState === "visible") {
         console.log("Tab is back in focus.");
         connectClient(); // reconnect if client was killed while in background
@@ -60,10 +60,12 @@ export const useTelepartyClient = () => {
     };
 
     // for mobile browser
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("visibilitychange", onReturn);
+    window.addEventListener("focus", onReturn);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.addEventListener("visibilitychange", onReturn);
+      window.addEventListener("focus", onReturn);
       clientRef.current = null;
     };
   }, []);
