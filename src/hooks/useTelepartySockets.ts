@@ -52,22 +52,11 @@ export const useTelepartyClient = () => {
 
   useEffect(() => {
     connectClient(); // Initial connection on mount
-    const onReturn = () => {
-      if (!clientRef.current) {
-        console.log("Reconnecting from focus or visibility...");
-        connectClient();
-      }
-    };
-
-    // for mobile browser
-    document.addEventListener("visibilitychange", onReturn);
-    window.addEventListener("focus", onReturn);
-
-    return () => {
-      document.addEventListener("visibilitychange", onReturn);
-      window.addEventListener("focus", onReturn);
-    };
-  }, []);
+    if (!clientRef.current) {
+      connectClient();
+      setIsConnected(false);
+    }
+  }, [clientRef.current]);
 
   useEffect(() => {
     // checking if connection is idle or not at interval of 5
