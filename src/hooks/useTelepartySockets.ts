@@ -20,16 +20,20 @@ export const useTelepartyClient = () => {
   const [messages, setMessages] = useState<SessionChatMessage[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [anyoneTyping, setAnyoneTyping] = useState<boolean>(false);
+
   const clientRef = useRef<TelepartyClient | null>(null);
 
-  useEffect(() => {
+  const connectClient = () => {
+    if (clientRef.current !== null) return; // Already connected
+
     const handler: SocketEventHandler = {
       onConnectionReady: () => {
         setIsConnected(true);
       },
       onClose: () => {
-        console.log("Connection closed. Please reload the page.");
         setIsConnected(false);
+        connectClient();
+        console.warn("Socket closed.");
       },
       onMessage: (message) => {
         console.log("show message", message);
@@ -37,7 +41,6 @@ export const useTelepartyClient = () => {
           setMessages((prev) => [...prev, message.data]);
         } else if (message.type === SocketMessageTypes.SET_TYPING_PRESENCE) {
           const typingData: TypingMessageData = message.data;
-          console.log("Someone typing", typingData);
           setAnyoneTyping(typingData.anyoneTyping);
         }
       },
@@ -45,11 +48,30 @@ export const useTelepartyClient = () => {
 
     const newClient = new TelepartyClient(handler);
     clientRef.current = newClient;
+  };
+
+  useEffect(() => {
+    connectClient(); // Initial connection on mount
+
     return () => {
       clientRef.current = null;
     };
   }, []);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Checking connection.. ");
+      if (!clientRef.current) {
+        console.log("Client is null. Reconnecting...");
+        setIsConnected(false);
+        connectClient();
+      }
+    }, 5000); // check every 5s
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // All utilities are written below
   const sendTypingPresence = (typing: boolean) => {
     if (clientRef.current) {
       const typingData: SetTypingMessageData = { typing };
@@ -62,7 +84,7 @@ export const useTelepartyClient = () => {
 
   const createRoom = async (nickname: string, userIcon?: string) => {
     if (!isConnected || !clientRef.current) {
-      alert("Connection failed");
+      alert("Connection failed, please reload page");
       return;
     }
     if (!nickname) {
@@ -82,7 +104,7 @@ export const useTelepartyClient = () => {
       alert("Please enter username");
       return false;
     } else if (!isConnected || !clientRef.current) {
-      alert("Connection failed");
+      alert("Connection failed, Please reload");
       return false;
     } else if (!roomId) {
       alert("Wrong Room Id");

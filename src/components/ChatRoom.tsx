@@ -39,7 +39,9 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   const handleSendMessage = () => {
     if (message.trim()) {
       sendMessage(message);
-      setMessage("");
+      setTimeout(() => {
+        setMessage("");
+      }, 500);
     }
     sendTypingPresence(false);
   };
@@ -64,20 +66,16 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
   }, [messages]);
 
   const handleLeaveRoom = () => {
-    localStorage.removeItem("roomId");
-    localStorage.removeItem("nickname");
-    localStorage.removeItem("userIcon");
+    sessionStorage.clear();
 
     // Clear the roomId from the URL
     const url = new URL(window.location.href);
     url.searchParams.delete("roomId");
     window.history.replaceState({}, "", url.pathname);
 
-    // Reload to reset the app state
     window.location.reload();
   };
 
-  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div>
       <h3>Chat Room: {roomId}</h3>
@@ -95,7 +93,7 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       <div className="messages">
         {messages.map((msg) => (
           <div
-            key={msg.permId}
+            key={msg.timestamp}
             className={`chat-bubble ${msg.userNickname === nickname ? "self-message" : "other-message"}`}
           >
             <div className="chat-meta">
@@ -109,15 +107,12 @@ export const ChatRoom: React.FC<ChatRoomProps> = ({
       </div>
       <div className="send-message-parent">
         <div className="typing-indicator">
-          {!inputRef?.current?.value && anyoneTyping && (
-            <p>💬 Someone is typing...</p>
-          )}
+          {!message && anyoneTyping && <p>💬 Someone is typing...</p>}
         </div>
         <div className="send-message-child">
           <div className="input-area">
             <input
               type="text"
-              ref={inputRef}
               value={message}
               onChange={handleTyping}
               onBlur={handleBlur}
